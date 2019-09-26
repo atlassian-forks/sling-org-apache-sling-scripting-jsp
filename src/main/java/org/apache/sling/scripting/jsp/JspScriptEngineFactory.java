@@ -256,7 +256,7 @@ public class JspScriptEngineFactory
     private void callErrorPageJsp(final Bindings bindings,
                                   final SlingScriptHelper scriptHelper,
                                   final ScriptContext context,
-                                  final String scriptName) {
+                                  final String scriptName) throws RuntimeException {
     	final SlingBindings slingBindings = new SlingBindings();
         slingBindings.putAll(bindings);
 
@@ -270,9 +270,8 @@ public class JspScriptEngineFactory
 
         // abort if JSP Support is shut down concurrently (SLING-2704)
         if (io == null || jspfh == null) {
-            logger.warn("callJsp: JSP Script Engine seems to be shut down concurrently; not calling {}",
+            throw new RuntimeException("callJsp: JSP Script Engine seems to be shut down concurrently; not calling "+
                     scriptHelper.getScript().getScriptResource().getPath());
-            return;
         }
 
         final ResourceResolver oldResolver = io.setRequestResourceResolver(resolver);
@@ -314,7 +313,7 @@ public class JspScriptEngineFactory
      */
     private void callJsp(final Bindings bindings,
                          final SlingScriptHelper scriptHelper,
-                         final ScriptContext context) {
+                         final ScriptContext context) throws RuntimeException {
 
         ResourceResolver resolver = (ResourceResolver) context.getAttribute(SlingScriptConstants.ATTR_SCRIPT_RESOURCE_RESOLVER,
                 SlingScriptConstants.SLING_SCOPE);
@@ -323,12 +322,10 @@ public class JspScriptEngineFactory
         }
         final SlingIOProvider io = this.ioProvider;
         final JspFactoryHandler jspfh = this.jspFactoryHandler;
-
         // abort if JSP Support is shut down concurrently (SLING-2704)
         if (io == null || jspfh == null) {
-            logger.warn("callJsp: JSP Script Engine seems to be shut down concurrently; not calling {}",
+            throw new RuntimeException("callJsp: JSP Script Engine seems to be shut down concurrently; not calling "+
                     scriptHelper.getScript().getScriptResource().getPath());
-            return;
         }
 
         final ResourceResolver oldResolver = io.setRequestResourceResolver(resolver);
@@ -620,7 +617,13 @@ public class JspScriptEngineFactory
                     // fallback to standard behaviour
                     throw new BetterScriptException(e.getMessage(), e);
                 } catch (final SlingPageException sje) {
-                	callErrorPageJsp(props, scriptHelper, context, sje.getErrorPage());
+                    try {
+                        callErrorPageJsp(props, scriptHelper, context, sje.getErrorPage());
+                    }
+                    catch (final Exception e) {
+
+                        throw new BetterScriptException(e.getMessage(), e);
+                    }
 
                 } catch (final Exception e) {
 

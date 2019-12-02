@@ -38,7 +38,19 @@ import javax.servlet.jsp.el.VariableResolver;
 import javax.servlet.jsp.tagext.BodyContent;
 
 import org.apache.sling.api.scripting.SlingBindings;
+import org.apache.sling.scripting.jsp.jasper.compiler.JspRuntimeContext;
 
+/**
+ * <p>
+ * The {@code SlingJspPageContext} wraps the default Jasper {@link org.apache.sling.scripting.jsp.jasper.runtime.PageContextImpl} when
+ * the {@link SlingBindings} are available in the request's attributes. The purpose of this slightly customised {@link PageContext}
+ * implementation is to enhance the default {@code pageContext} with the {@link SlingBindings} map's values, as long as the default {@code
+ * pageContext} doesn't already contain identically named attributes.
+ * </p>
+ * <br/>
+ * <p>For more details check
+ * {@link JspRuntimeContext.JspFactoryHandler#getPageContext(javax.servlet.Servlet, javax.servlet.ServletRequest, javax.servlet.ServletResponse, java.lang.String, boolean, int, boolean)}.</p>
+ */
 public class SlingJspPageContext extends PageContext {
 
     private final PageContext wrapped;

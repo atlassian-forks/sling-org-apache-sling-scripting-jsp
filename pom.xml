@@ -31,7 +31,7 @@
     <version>2.3.9-SNAPSHOT</version>
     <packaging>bundle</packaging>
 
-    <name>Apache Sling Scripting JSP Support</name>
+    <name>Apache Sling Scripting JSP</name>
     <description>Support for JSP scripting</description>
 
     <scm>

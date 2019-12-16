@@ -19,6 +19,7 @@
 package org.apache.sling.scripting.jsp;
 
 import java.io.IOException;
+import java.io.Writer;
 import java.util.Enumeration;
 
 import javax.el.ELContext;
@@ -216,5 +217,15 @@ public class SlingJspPageContext extends PageContext {
     @Override
     public ErrorData getErrorData() {
         return wrapped.getErrorData();
+    }
+
+    @Override
+    public JspWriter pushBody(Writer writer) {
+        return wrapped.pushBody(writer);
+    }
+
+    @Override
+    public JspWriter popBody() {
+        return wrapped.popBody();
     }
 }

@@ -1,0 +1,3 @@
+ScriptEngine-Name:${project.name}
+ScriptEngine-Version:${project.version}
+-conditionalpackage: org.apache.el.*

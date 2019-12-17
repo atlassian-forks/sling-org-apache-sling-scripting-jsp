@@ -22,14 +22,13 @@
     <modelVersion>4.0.0</modelVersion>
     <parent>
         <groupId>org.apache.sling</groupId>
-        <artifactId>sling</artifactId>
-        <version>30</version>
+        <artifactId>sling-bundle-parent</artifactId>
+        <version>35</version>
         <relativePath />
     </parent>
 
     <artifactId>org.apache.sling.scripting.jsp</artifactId>
     <version>2.4.1-SNAPSHOT</version>
-    <packaging>bundle</packaging>
 
     <name>Apache Sling Scripting JSP</name>
     <description>Support for JSP scripting</description>
@@ -44,31 +43,6 @@
     <build>
         <plugins>
             <plugin>
-                <groupId>org.apache.felix</groupId>
-                <artifactId>maven-bundle-plugin</artifactId>
-                <extensions>true</extensions>
-                <configuration>
-                    <instructions>
-                        <Export-Package>
-                            org.apache.sling.scripting.jsp.util;version=2.0.8
-                        </Export-Package>
-                        <Private-Package>
-                            org.apache.sling.scripting.jsp.*,
-                            org.apache.juli.logging
-                        </Private-Package>
-
-                        <ScriptEngine-Name>${project.name}</ScriptEngine-Name>
-                        <ScriptEngine-Version>${project.version}</ScriptEngine-Version>
-
-                        <Embed-Dependency>
-                            jasper-el,
-                            org.apache.sling.commons.osgi;inline="org/apache/sling/commons/osgi/PropertiesUtil.*"
-                        </Embed-Dependency>
-                        <Embed-StripGroup>true</Embed-StripGroup>
-                    </instructions>
-                </configuration>
-            </plugin>
-            <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-javadoc-plugin</artifactId>
                 <configuration>
@@ -82,6 +56,26 @@
     </build>
 
     <dependencies>
+        <dependency>
+            <groupId>org.osgi</groupId>
+            <artifactId>org.osgi.framework</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.osgi</groupId>
+            <artifactId>org.osgi.annotation.versioning</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.osgi</groupId>
+            <artifactId>org.osgi.service.component.annotations</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.osgi</groupId>
+            <artifactId>org.osgi.service.metatype.annotations</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.osgi</groupId>
+            <artifactId>org.osgi.annotation.bundle</artifactId>
+        </dependency>
         <dependency>
             <groupId>javax.servlet</groupId>
             <artifactId>javax.servlet-api</artifactId>
@@ -102,11 +96,6 @@
         <dependency>
             <groupId>org.slf4j</groupId>
             <artifactId>slf4j-api</artifactId>
-            <scope>provided</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.osgi</groupId>
-            <artifactId>osgi.core</artifactId>
             <scope>provided</scope>
         </dependency>
         <dependency>

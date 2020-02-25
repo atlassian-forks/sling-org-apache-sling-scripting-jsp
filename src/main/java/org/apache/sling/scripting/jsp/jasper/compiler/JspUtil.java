@@ -31,6 +31,7 @@ import javax.el.FunctionMapper;
 import javax.servlet.jsp.el.ExpressionEvaluator;
 
 import org.apache.el.ExpressionFactoryImpl;
+import org.apache.sling.commons.compiler.source.JavaEscapeHelper;
 import org.apache.sling.scripting.jsp.jasper.Constants;
 import org.apache.sling.scripting.jsp.jasper.JasperException;
 import org.apache.sling.scripting.jsp.jasper.JspCompilationContext;
@@ -911,28 +912,9 @@ public class JspUtil {
         }
     }
 
-        className += makeJavaPackage(path.substring(begin));
+        className += JavaEscapeHelper.makeJavaPackage(path.substring(begin));
 
        return className;
-    }
-
-    /**
-     * Converts the given path to a Java package or fully-qualified class name
-     *
-     * @param path Path to convert
-     *
-     * @return Java package corresponding to the given path
-     */
-    public static final String makeJavaPackage(String path) {
-        String classNameComponents[] = split(path,"/");
-        StringBuffer legalClassNames = new StringBuffer();
-        for (int i = 0; i < classNameComponents.length; i++) {
-            legalClassNames.append(makeJavaIdentifier(classNameComponents[i]));
-            if (i < classNameComponents.length - 1) {
-                legalClassNames.append('.');
-            }
-        }
-        return legalClassNames.toString();
     }
 
     /**
@@ -961,69 +943,6 @@ public class JspUtil {
             result[i] = (String)comps.elementAt(i);
         }
         return result;
-    }
-
-    /**
-     * Converts the given identifier to a legal Java identifier
-     *
-     * @param identifier Identifier to convert
-     *
-     * @return Legal Java identifier corresponding to the given identifier
-     */
-    public static final String makeJavaIdentifier(String identifier) {
-        StringBuffer modifiedIdentifier =
-            new StringBuffer(identifier.length());
-        if (!Character.isJavaIdentifierStart(identifier.charAt(0))) {
-            modifiedIdentifier.append('_');
-        }
-        for (int i = 0; i < identifier.length(); i++) {
-            char ch = identifier.charAt(i);
-            if (Character.isJavaIdentifierPart(ch) && ch != '_') {
-                modifiedIdentifier.append(ch);
-            } else if (ch == '.') {
-                modifiedIdentifier.append('_');
-            } else {
-                modifiedIdentifier.append(mangleChar(ch));
-            }
-        }
-        if (isJavaKeyword(modifiedIdentifier.toString())) {
-            modifiedIdentifier.append('_');
-        }
-        return modifiedIdentifier.toString();
-    }
-
-    /**
-     * Mangle the specified character to create a legal Java class name.
-     */
-    public static final String mangleChar(char ch) {
-        char[] result = new char[5];
-        result[0] = '_';
-        result[1] = Character.forDigit((ch >> 12) & 0xf, 16);
-        result[2] = Character.forDigit((ch >> 8) & 0xf, 16);
-        result[3] = Character.forDigit((ch >> 4) & 0xf, 16);
-        result[4] = Character.forDigit(ch & 0xf, 16);
-        return new String(result);
-    }
-
-    /**
-     * Test whether the argument is a Java keyword
-     */
-    public static boolean isJavaKeyword(String key) {
-        int i = 0;
-        int j = javaKeywords.length;
-        while (i < j) {
-            int k = (i+j)/2;
-            int result = javaKeywords[k].compareTo(key);
-            if (result == 0) {
-                return true;
-            }
-            if (result < 0) {
-                i = k+1;
-            } else {
-                j = k;
-            }
-        }
-        return false;
     }
 
     /**

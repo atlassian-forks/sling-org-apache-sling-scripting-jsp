@@ -40,6 +40,7 @@ import javax.servlet.jsp.tagext.TagInfo;
 import javax.servlet.jsp.tagext.TagVariableInfo;
 import javax.servlet.jsp.tagext.VariableInfo;
 
+import org.apache.sling.commons.compiler.source.JavaEscapeHelper;
 import org.apache.sling.scripting.jsp.jasper.Constants;
 import org.apache.sling.scripting.jsp.jasper.JasperException;
 import org.apache.sling.scripting.jsp.jasper.JspCompilationContext;
@@ -310,7 +311,7 @@ class Generator {
                 if (hasEmptyBody) {
                     poolName = poolName + "_nobody";
                 }
-                return JspUtil.makeJavaIdentifier(poolName);
+                return JavaEscapeHelper.getJavaIdentifier(poolName);
             }
         }
 
@@ -2751,7 +2752,7 @@ class Generator {
                     varName = varName + "0";
                 }
             }
-            return JspUtil.makeJavaIdentifier(varName);
+            return JavaEscapeHelper.getJavaIdentifier(varName);
         }
 
         private String evaluateAttribute(TagHandlerInfo handlerInfo,

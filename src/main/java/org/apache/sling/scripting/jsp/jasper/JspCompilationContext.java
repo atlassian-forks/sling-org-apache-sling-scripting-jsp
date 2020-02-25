@@ -30,10 +30,10 @@ import java.util.Set;
 import javax.servlet.ServletContext;
 import javax.servlet.jsp.tagext.TagInfo;
 
+import org.apache.sling.commons.compiler.source.JavaEscapeHelper;
 import org.apache.sling.scripting.jsp.jasper.compiler.Compiler;
 import org.apache.sling.scripting.jsp.jasper.compiler.JDTCompiler;
 import org.apache.sling.scripting.jsp.jasper.compiler.JspRuntimeContext;
-import org.apache.sling.scripting.jsp.jasper.compiler.JspUtil;
 import org.apache.sling.scripting.jsp.jasper.compiler.Localizer;
 import org.apache.sling.scripting.jsp.jasper.compiler.ServletWriter;
 
@@ -310,7 +310,7 @@ public class JspCompilationContext {
             }
         } else {
             int iSep = jspUri.lastIndexOf('/') + 1;
-            className = JspUtil.makeJavaIdentifier(jspUri.substring(iSep));
+            className = JavaEscapeHelper.getJavaIdentifier(jspUri.substring(iSep));
         }
         return className;
     }
@@ -389,7 +389,7 @@ public class JspCompilationContext {
         if (derivedPackageName == null) {
             int iSep = jspUri.lastIndexOf('/');
             derivedPackageName = (iSep > 0) ?
-                    JspUtil.makeJavaPackage(jspUri.substring(1,iSep)) : "";
+                    JavaEscapeHelper.makeJavaPackage(jspUri.substring(1,iSep)) : "";
         }
         return derivedPackageName;
     }

@@ -98,10 +98,15 @@ public class Constants {
         System.getProperty("org.apache.sling.scripting.jsp.jasper.Constants.PRECOMPILE", "jsp_precompile");
 
     /**
+     * The name of the system property that will be checked to set the value for {@link #JSP_PACKAGE_NAME}.
+     */
+    public static final String JSP_PACKAGE_NAME_PROPERTY_NAME = "org.apache.sling.scripting.jsp.jasper.Constants.JSP_PACKAGE_NAME";
+
+    /**
      * The default package name for compiled jsp pages.
      */
     public static final String JSP_PACKAGE_NAME = 
-        System.getProperty("org.apache.sling.scripting.jsp.jasper.Constants.JSP_PACKAGE_NAME", "org.apache.jsp");
+        System.getProperty(JSP_PACKAGE_NAME_PROPERTY_NAME, "org.apache.jsp");
 
     /**
      * The default package name for tag handlers generated from tag files

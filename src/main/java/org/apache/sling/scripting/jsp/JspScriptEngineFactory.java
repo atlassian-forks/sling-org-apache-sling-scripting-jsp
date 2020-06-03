@@ -197,7 +197,6 @@ public class JspScriptEngineFactory
     private SlingTldLocationsCache tldLocationsCache;
 
     private JspRuntimeContext jspRuntimeContext;
-    private ReentrantReadWriteLock jspRuntimeContextLock = new ReentrantReadWriteLock();
 
     private JspServletOptions options;
 
@@ -643,23 +642,16 @@ public class JspScriptEngineFactory
     }
 
     private JspRuntimeContext getJspRuntimeContext() {
-        jspRuntimeContextLock.readLock().lock();
-        if (jspRuntimeContext == null) {
-            jspRuntimeContextLock.readLock().unlock();
-            jspRuntimeContextLock.writeLock().lock();
-            try {
-                jspRuntimeContext = new JspRuntimeContext(slingServletContext,
+        if ( this.jspRuntimeContext == null ) {
+            synchronized ( this ) {
+                if ( this.jspRuntimeContext == null ) {
+                    // Initialize the JSP Runtime Context
+                    this.jspRuntimeContext = new JspRuntimeContext(slingServletContext,
                         options, ioProvider);
-                jspRuntimeContextLock.readLock().lock();
-            } finally {
-                jspRuntimeContextLock.writeLock().unlock();
+                }
             }
         }
-        try {
-            return jspRuntimeContext;
-        } finally {
-            jspRuntimeContextLock.readLock().unlock();
-        }
+        return this.jspRuntimeContext;
     }
 
     /**

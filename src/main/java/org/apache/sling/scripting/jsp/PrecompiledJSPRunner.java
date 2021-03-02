@@ -31,10 +31,10 @@ import org.apache.sling.api.SlingIOException;
 import org.apache.sling.api.SlingServletException;
 import org.apache.sling.api.scripting.SlingBindings;
 import org.apache.sling.commons.compiler.source.JavaEscapeHelper;
-import org.apache.sling.servlets.resolver.bundle.tracker.BundledRenderUnit;
 import org.apache.sling.scripting.jsp.jasper.compiler.JspRuntimeContext;
 import org.apache.sling.scripting.jsp.jasper.runtime.AnnotationProcessor;
 import org.apache.sling.scripting.jsp.jasper.runtime.HttpJspBase;
+import org.apache.sling.scripting.spi.bundle.BundledRenderUnit;
 import org.osgi.framework.Bundle;
 import org.osgi.service.component.annotations.Component;
 

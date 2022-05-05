@@ -515,14 +515,14 @@ public class JspServletWrapper {
                 (HttpServletResponse.SC_SERVICE_UNAVAILABLE,
                  ex.getMessage());
             return;
+        } catch (final SlingException ex) {
+        	throw ex;
         } catch (final ServletException ex) {
             handleJspException(ex);
         } catch (final IOException ex) {
             handleJspException(ex);
         } catch (final IllegalStateException ex) {
             handleJspException(ex);
-        } catch (final SlingPageException ex) {
-        	throw ex;
         }catch (final Exception ex) {
             handleJspException(ex);
         }
@@ -635,7 +635,7 @@ public class JspServletWrapper {
             StackTraceElement jspFrame = null;
 
             for (int i=0; i<frames.length; ++i) {
-                if ( frames[i].getClassName().equals(this.theServlet.getClass().getName()) ) {
+                if ( frames[i].getClassName().equals(this.ctxt.getClassName()) ) {
                     jspFrame = frames[i];
                     break;
                 }
@@ -647,7 +647,7 @@ public class JspServletWrapper {
                 if ( ex instanceof ServletException ) {
                     return ex;
                 }
-                return new SlingException(ex) {};
+                return new SlingException(ex.getMessage(), ex);
             }
             int javaLineNumber = jspFrame.getLineNumber();
             JavacErrorDetail detail = ErrorDispatcher.createJavacError(

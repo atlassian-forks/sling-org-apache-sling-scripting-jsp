@@ -204,7 +204,7 @@ public class JspCompilationContext {
     }
 
     public Compiler getCompiler() {
-        return jspCompiler;
+        return createCompiler();
     }
 
     /** ---------- Access resources in the webapp ---------- */
@@ -524,15 +524,20 @@ public class JspCompilationContext {
 
     // ==================== Manipulating the class ====================
 
+    public String getClassName() {
+        String name;
+        if (isTagFile()) {
+            name = tagInfo.getTagClassName();
+        } else {
+            name = getServletPackageName() + "." + getServletClassName();
+        }
+        return name;
+    }
+
     public Class<?> load()
     throws JasperException {
         try {
-            String name;
-            if (isTagFile()) {
-                name = tagInfo.getTagClassName();
-            } else {
-                name = getServletPackageName() + "." + getServletClassName();
-            }
+            final String name = this.getClassName();
             final Class<?> servletClass = getClassLoader().loadClass(name);
             return servletClass;
         } catch (ClassNotFoundException cex) {

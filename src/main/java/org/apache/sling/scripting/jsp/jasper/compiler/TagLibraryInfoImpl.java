@@ -164,7 +164,7 @@ class TagLibraryInfoImpl extends TagLibraryInfo implements TagConstants {
 
                 parseTLD(ctxt, location[0], in, null);
                 // Add TLD to dependency list
-                PageInfo pageInfo = ctxt.getCompiler().getPageInfo();
+                PageInfo pageInfo = ctxt.activateCompiler().getPageInfo();
                 if (pageInfo != null) {
                     pageInfo.addDependant(location[0]);
                 }

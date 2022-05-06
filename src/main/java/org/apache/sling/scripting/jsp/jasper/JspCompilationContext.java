@@ -204,7 +204,15 @@ public class JspCompilationContext {
     }
 
     public Compiler getCompiler() {
-        return createCompiler();
+        return this.jspCompiler;
+    }
+
+    public Compiler activateCompiler() {
+        if ( jspCompiler == null ) {
+            // create compile and compile
+            this.compile(); // we ignore the exception
+        }
+        return jspCompiler;
     }
 
     /** ---------- Access resources in the webapp ---------- */
@@ -495,14 +503,10 @@ public class JspCompilationContext {
     // ==================== Compile and reload ====================
 
     public JasperException compile() {
-        return compile(false);
-    }
-
-    public JasperException compile(boolean fromJSPC) {
         final Compiler c = createCompiler();
         try {
             c.removeGeneratedFiles();
-            c.compile(true, fromJSPC);
+            c.compile(true, false);
         } catch (final JasperException ex) {
             return ex;
         } catch (final IOException ioe) {

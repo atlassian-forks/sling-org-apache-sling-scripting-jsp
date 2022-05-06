@@ -24,17 +24,14 @@ import java.io.Reader;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 import javax.script.Bindings;
 import javax.script.ScriptContext;
 import javax.script.ScriptEngine;
 import javax.script.ScriptException;
 import javax.servlet.ServletContext;
-import javax.servlet.ServletException;
 
 import org.apache.sling.api.SlingHttpServletRequest;
-import org.apache.sling.api.SlingServletException;
 import org.apache.sling.api.resource.ResourceResolver;
 import org.apache.sling.api.resource.observation.ExternalResourceChangeListener;
 import org.apache.sling.api.resource.observation.ResourceChange;
@@ -54,7 +51,6 @@ import org.apache.sling.scripting.jsp.jasper.compiler.JspRuntimeContext.JspFacto
 import org.apache.sling.scripting.jsp.jasper.runtime.AnnotationProcessor;
 import org.apache.sling.scripting.jsp.jasper.runtime.JspApplicationContextImpl;
 import org.apache.sling.scripting.jsp.jasper.servlet.JspServletWrapper;
-import org.apache.sling.scripting.jsp.util.TagUtil;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.Constants;
 import org.osgi.service.component.annotations.Activate;
@@ -63,7 +59,6 @@ import org.osgi.service.component.annotations.Deactivate;
 import org.osgi.service.component.annotations.Reference;
 import org.osgi.service.component.annotations.ReferenceCardinality;
 import org.osgi.service.component.annotations.ReferencePolicy;
-import org.osgi.service.component.annotations.ReferencePolicyOption;
 import org.osgi.service.metatype.annotations.AttributeDefinition;
 import org.osgi.service.metatype.annotations.Designate;
 import org.osgi.service.metatype.annotations.ObjectClassDefinition;
@@ -585,35 +580,12 @@ public class JspScriptEngineFactory
                     if (!contextHasPrecompiledJsp) {
                         callJsp(slingBindings);
                     }
-                } catch (final SlingServletException e) {
-                    // ServletExceptions use getRootCause() instead of getCause(),
-                    // so we have to extract the actual root cause and pass it as
-                    // cause in our new ScriptException
-                    if (e.getCause() != null) {
-                        // SlingServletException always wraps ServletExceptions
-                        Throwable rootCause = TagUtil.getRootCause((ServletException) e.getCause());
-                        // the ScriptException unfortunately does not accept a Throwable as cause,
-                        // but only a Exception, so we have to wrap it with a dummy Exception in Throwable cases
-                        if (rootCause instanceof Exception) {
-                            throw new BetterScriptException(rootCause.toString(), (Exception) rootCause);
-                        }
-                        throw new BetterScriptException(rootCause.toString(),
-                                new Exception("Wrapping Throwable: " + rootCause.toString(), rootCause));
-                    }
-
-                    // fallback to standard behaviour
-                    throw new BetterScriptException(e.getMessage(), e);
                 } catch (final SlingPageException sje) {
                     try {
                         callErrorPageJsp(slingBindings, sje.getErrorPage());
                     } catch (final Exception e) {
-
-                        throw new BetterScriptException(e.getMessage(), e);
+                        throw e;
                     }
-
-                } catch (final Exception e) {
-
-                    throw new BetterScriptException(e.getMessage(), e);
 
                 } finally {
 
@@ -652,29 +624,6 @@ public class JspScriptEngineFactory
             }
         }
         return this.jspRuntimeContext;
-    }
-
-    /**
-     * Fixes {@link ScriptException} that overwrites the
-     * {@link ScriptException#getMessage()} method to display its own
-     * <code>message</code> instead of the <code>detailMessage</code>
-     * defined in {@link Throwable}. Unfortunately using the constructor
-     * {@link ScriptException#ScriptException(Exception)} does not set the
-     * <code>message</code> member of {@link ScriptException}, which leads to
-     * a message of <code>"null"</code>, effectively supressing the detailed
-     * information of the cause. This class provides a way to do that explicitly
-     * with a new constructor accepting both a message and a causing exception.
-     *
-     */
-    private static class BetterScriptException extends ScriptException {
-
-        private static final long serialVersionUID = -6490165487977283019L;
-
-        public BetterScriptException(final String message, final Exception cause) {
-            super(message);
-            this.initCause(cause);
-        }
-
     }
 
     @Override

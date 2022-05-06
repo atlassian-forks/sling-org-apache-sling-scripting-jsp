@@ -53,31 +53,31 @@ import org.apache.sling.scripting.jsp.jasper.compiler.ServletWriter;
  */
 public class JspCompilationContext {
 
-    private Map<String, URL> tagFileJarUrls;
+    private final Map<String, URL> tagFileJarUrls;
 
-    private String className;
-    private String jspUri;
-    private boolean isErrPage;
-    private String basePackageName;
-    private String derivedPackageName;
-    private String servletJavaFileName;
-    private String javaPath;
-    private String classFileName;
-    private String contentType;
-    private ServletWriter writer;
-    private Options options;
-    private Compiler jspCompiler;
+    private volatile String className;
+    private final String jspUri;
+    private volatile boolean isErrPage;
+    private final String basePackageName;
+    private volatile String derivedPackageName;
+    private volatile String servletJavaFileName;
+    private volatile String javaPath;
+    private volatile String classFileName;
+    private volatile String contentType;
+    private volatile ServletWriter writer;
+    private final Options options;
+    private volatile Compiler jspCompiler;
 
-    private String baseURI;
-    private String outputDir;
-    private ServletContext context;
+    private volatile String baseURI;
+    private volatile String outputDir;
+    private final ServletContext context;
 
-    private JspRuntimeContext rctxt;
+    private final JspRuntimeContext rctxt;
 
-    private boolean isTagFile;
-    private boolean protoTypeMode;
-    private TagInfo tagInfo;
-    private URL tagFileJarUrl;
+    private volatile boolean isTagFile;
+    private volatile boolean protoTypeMode;
+    private volatile TagInfo tagInfo;
+    private volatile URL tagFileJarUrl;
 
     private final boolean defaultIsSession;
 
@@ -209,8 +209,12 @@ public class JspCompilationContext {
 
     public Compiler activateCompiler() {
         if ( jspCompiler == null ) {
-            // create compile and compile
-            this.compile(); // we ignore the exception
+            synchronized ( this ) {
+                if ( jspCompiler == null ) {
+                    // create compile and compile
+                    this.compile(); // we ignore the exception
+                }
+            }
         }
         return jspCompiler;
     }

@@ -24,6 +24,7 @@ import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
@@ -100,15 +101,36 @@ public class JspServletWrapper {
             final Options options,
             final String jspUri,
             final boolean isErrorPage,
-            final JspRuntimeContext rctxt,
-            final boolean defaultIsSession) {
+            final JspRuntimeContext rctxt) {
 	    this.isTagFile = false;
         this.config = config;
         this.options = options;
         this.jspUri = jspUri;
         this.ctxt = new JspCompilationContext(jspUri, isErrorPage, options,
 					 config.getServletContext(),
-					 rctxt, defaultIsSession);
+					 rctxt);
+        if ( log.isDebugEnabled() ) {
+            log.debug("Creating new wrapper for servlet " + jspUri);
+        }
+    }
+
+    /**
+     * JspServletWrapper for precompiled JSPs
+     */
+    public JspServletWrapper(final ServletConfig config,
+            final Options options,
+            final String jspUri,
+            final boolean isErrorPage,
+            final JspRuntimeContext rctxt,
+            final Servlet servlet) {
+        this.isTagFile = false;
+        this.config = config;
+        this.options = options;
+        this.jspUri = jspUri;
+        this.ctxt = new JspCompilationContext(jspUri, isErrorPage, options,
+                             config.getServletContext(),
+                             rctxt, null);
+        this.theServlet = servlet;
         if ( log.isDebugEnabled() ) {
             log.debug("Creating new wrapper for servlet " + jspUri);
         }
@@ -122,7 +144,6 @@ public class JspServletWrapper {
 			     final String tagFilePath,
 			     final TagInfo tagInfo,
 			     final JspRuntimeContext rctxt,
-			     final boolean defaultIsSession,
 			     final URL tagFileJarUrl)
     throws JasperException {
         this.isTagFile = true;
@@ -130,8 +151,7 @@ public class JspServletWrapper {
         this.options = options;
         this.jspUri = tagFilePath;
         this.ctxt = new JspCompilationContext(jspUri, tagInfo, options,
-					 servletContext, rctxt, defaultIsSession,
-					 tagFileJarUrl);
+					 servletContext, rctxt, tagFileJarUrl);
         if ( log.isDebugEnabled() ) {
             log.debug("Creating new wrapper for tagfile " + jspUri);
         }
@@ -615,7 +635,6 @@ public class JspServletWrapper {
                 }
             }
 
-
             // If we couldn't find a frame in the stack trace corresponding
             // to the generated servlet class, we can't really add anything
             if (jspFrame != null) {
@@ -642,8 +661,7 @@ public class JspServletWrapper {
                                 .concat(" : ").concat(origMsg);
                     }    
                     result = new SlingException(message, ex);    
-                }
-    
+                }    
             }
         } catch (final Exception je) {
             // If anything goes wrong, just revert to the original behaviour

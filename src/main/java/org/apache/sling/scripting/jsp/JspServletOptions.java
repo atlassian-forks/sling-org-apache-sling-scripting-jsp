@@ -99,6 +99,8 @@ public class JspServletOptions implements Options {
 
     private boolean errorOnUseBeanInvalidClassAttribute = true;
 
+    private boolean defaultIsSession = false;
+
     /**
      * Need to have this as is for versions 4 and 5 of IE. Can be set from the
      * initParams so if it changes in the future all that is needed is to have a
@@ -321,14 +323,20 @@ public class JspServletOptions implements Options {
         return null;
     }
 
+    public boolean isDefaultSession() {
+        return this.defaultIsSession;
+    }
+
     /**
      * Create an JspServletOptions object using data available from
      * ServletConfig and ServletContext.
      */
     public JspServletOptions(ServletContext servletContext,
             IOProvider ioProvider, Map<String, Object> config,
-            TldLocationsCache tldLocationsCache) {
+            TldLocationsCache tldLocationsCache,
+            boolean defaultIsSession) {
 
+        this.defaultIsSession = defaultIsSession;
         // JVM version numbers default to current vm version
         this.compilerSourceVM = System.getProperty("java.specification.version");
         this.compilerTargetVM = this.compilerSourceVM;

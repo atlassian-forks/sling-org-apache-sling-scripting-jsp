@@ -20,6 +20,7 @@ package org.apache.sling.scripting.jsp.jasper.runtime;
 import java.io.IOException;
 import java.io.Writer;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -43,7 +44,6 @@ import javax.servlet.jsp.tagext.BodyContent;
 import javax.servlet.jsp.tagext.VariableInfo;
 
 import org.apache.sling.scripting.jsp.jasper.compiler.Localizer;
-import org.apache.sling.scripting.jsp.jasper.util.Enumerator;
 
 /**
  * Implementation of a JSP Context Wrapper.
@@ -222,7 +222,7 @@ public class JspContextWrapper extends PageContext implements VariableResolver {
 
 	public Enumeration<String> getAttributeNamesInScope(int scope) {
 		if (scope == PAGE_SCOPE) {
-			return new Enumerator(pageAttributes.keySet().iterator());
+			return Collections.enumeration(pageAttributes.keySet());
 		}
 
 		return invokingJspCtxt.getAttributeNamesInScope(scope);

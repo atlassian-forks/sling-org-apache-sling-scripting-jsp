@@ -170,8 +170,7 @@ public class JspScriptEngineFactory
 
     private ServletContext slingServletContext;
 
-    @Reference
-    private PrecompiledJSPRunner precompiledJSPRunner;
+    private volatile PrecompiledJSPRunner precompiledJSPRunner;
 
     @Reference
     private ClassLoaderWriter classLoaderWriter;
@@ -196,8 +195,6 @@ public class JspScriptEngineFactory
     private JspServletOptions options;
 
     private JspServletConfig servletConfig;
-
-    private boolean defaultIsSession;
 
     /** The handler for the jsp factories. */
     private JspFactoryHandler jspFactoryHandler;
@@ -269,7 +266,7 @@ public class JspScriptEngineFactory
         }
 
         wrapper = new JspServletWrapper(servletConfig, options,
-                scriptName, false, rctxt, defaultIsSession);
+                scriptName, false, rctxt);
         wrapper = rctxt.addWrapper(scriptName, wrapper);
 
         return wrapper;
@@ -284,8 +281,6 @@ public class JspScriptEngineFactory
     protected void activate(final BundleContext bundleContext,
             final Config config,
             final Map<String, Object> properties) {
-        this.defaultIsSession = config.default_is_session();
-
         // set the current class loader as the thread context loader for
         // the setup of the JspRuntimeContext
         final ClassLoader old = Thread.currentThread().getContextClassLoader();
@@ -301,12 +296,14 @@ public class JspScriptEngineFactory
 
             // return options which use the jspClassLoader
             options = new JspServletOptions(slingServletContext, ioProvider,
-                    properties, tldLocationsCache);
+                    properties, tldLocationsCache, config.default_is_session());
 
             JspServletContext jspServletContext = new JspServletContext(ioProvider,
                 slingServletContext, tldLocationsCache);
 
             servletConfig = new JspServletConfig(jspServletContext, options.getProperties());
+
+            this.precompiledJSPRunner = new PrecompiledJSPRunner(options);
 
         } finally {
             // make sure the context loader is reset after setting up the
@@ -327,7 +324,10 @@ public class JspScriptEngineFactory
     @Deactivate
     protected void deactivate(final BundleContext bundleContext) {
         logger.info("Deactivating Apache Sling Script Engine for JSP");
-
+        if ( this.precompiledJSPRunner != null ) {
+            this.precompiledJSPRunner.cleanup();
+            this.precompiledJSPRunner = null;
+        }
         if ( this.tldLocationsCache != null ) {
             this.tldLocationsCache.deactivate(bundleContext);
             this.tldLocationsCache = null;
@@ -492,8 +492,13 @@ public class JspScriptEngineFactory
             final ResourceResolver oldResolver = io.setRequestResourceResolver(resolver);
             jspfh.incUsage();
             try {
-                final JspServletWrapper jsp = getJspWrapper(scriptHelper.getScript().getScriptResource().getPath());
-                jsp.service(slingBindings);
+                final boolean contextHasPrecompiledJsp = precompiledJSPRunner
+                    .callPrecompiledJSP(getJspRuntimeContext(), jspFactoryHandler, servletConfig, slingBindings);
+
+                if (!contextHasPrecompiledJsp) {
+                    final JspServletWrapper jsp = getJspWrapper(scriptHelper.getScript().getScriptResource().getPath());
+                    jsp.service(slingBindings);
+                }
             } finally {
                 jspfh.decUsage();
                 io.resetRequestResourceResolver(oldResolver);
@@ -574,12 +579,7 @@ public class JspScriptEngineFactory
                     request.setAttribute(SlingBindings.class.getName(), slingBindings);
                 }
                 try {
-                    boolean contextHasPrecompiledJsp = precompiledJSPRunner
-                        .callPrecompiledJSP(jspFactoryHandler, servletConfig, slingBindings);
-
-                    if (!contextHasPrecompiledJsp) {
-                        callJsp(slingBindings);
-                    }
+                    callJsp(slingBindings);
                 } catch (final SlingPageException sje) {
                     try {
                         callErrorPageJsp(slingBindings, sje.getErrorPage());

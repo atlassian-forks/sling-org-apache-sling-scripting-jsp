@@ -30,6 +30,7 @@ import org.apache.sling.commons.compiler.CompilationUnitWithSource;
 import org.apache.sling.commons.compiler.CompilerMessage;
 import org.apache.sling.commons.compiler.Options;
 import org.apache.sling.scripting.jsp.jasper.JasperException;
+import org.apache.sling.scripting.jsp.jasper.JspCompilationContext;
 
 /**
  * JDT class compiler. This compiler will load source dependencies from the
@@ -38,8 +39,8 @@ import org.apache.sling.scripting.jsp.jasper.JasperException;
  */
 public class JDTCompiler extends org.apache.sling.scripting.jsp.jasper.compiler.Compiler {
 
-    public JDTCompiler(boolean defaultIsSession) {
-        super(defaultIsSession);
+    public JDTCompiler(final JspCompilationContext ctxt) {
+        super(ctxt);
     }
 
     /**
@@ -147,7 +148,7 @@ public class JDTCompiler extends org.apache.sling.scripting.jsp.jasper.compiler.
         }
 
         // JSR45 Support
-        if (! this.options.isSmapSuppressed()) {
+        if (! this.ctxt.getOptions().isSmapSuppressed()) {
             SmapUtil.installSmap(getCompilationContext(), smap);
         }
 

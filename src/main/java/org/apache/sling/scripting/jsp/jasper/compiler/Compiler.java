@@ -25,7 +25,6 @@ import java.io.UnsupportedEncodingException;
 
 import org.apache.sling.scripting.jsp.jasper.JasperException;
 import org.apache.sling.scripting.jsp.jasper.JspCompilationContext;
-import org.apache.sling.scripting.jsp.jasper.Options;
 import org.apache.sling.scripting.jsp.jasper.compiler.Node.CustomTag;
 
 /**
@@ -45,7 +44,7 @@ public abstract class Compiler {
 
     // ----------------------------------------------------- Instance Variables
 
-    protected JspCompilationContext ctxt;
+    protected final JspCompilationContext ctxt;
 
     protected ErrorDispatcher errDispatcher;
 
@@ -53,21 +52,12 @@ public abstract class Compiler {
 
     protected TagFileProcessor tfp;
 
-    protected Options options;
-
     protected Node.Nodes pageNodes;
-
-    private final boolean defaultIsSession;
 
     // ------------------------------------------------------------ Constructor
 
-    public Compiler(boolean defaultIsSession) {
-        this.defaultIsSession = defaultIsSession;
-    }
-
-    public void init(final JspCompilationContext ctxt) {
+    public Compiler(final JspCompilationContext ctxt) {
         this.ctxt = ctxt;
-        this.options = ctxt.getOptions();
     }
 
     // --------------------------------------------------------- Public Methods
@@ -103,9 +93,9 @@ public abstract class Compiler {
 
         // Setup page info area
         pageInfo = new PageInfo(new BeanRepository(ctxt.getClassLoader(),
-                errDispatcher), ctxt.getJspFile(), defaultIsSession);
+                errDispatcher), ctxt.getJspFile(), this.ctxt.getOptions().isDefaultSession());
 
-        JspConfig jspConfig = options.getJspConfig();
+        JspConfig jspConfig = this.ctxt.getOptions().getJspConfig();
         JspConfig.JspProperty jspProperty = jspConfig.findJspProperty(ctxt
                 .getJspFile());
 
@@ -194,7 +184,7 @@ public abstract class Compiler {
             ScriptingVariabler.set(pageNodes, errDispatcher);
 
             // Optimizations by Tag Plugins
-            TagPluginManager tagPluginManager = options.getTagPluginManager();
+            TagPluginManager tagPluginManager = this.ctxt.getOptions().getTagPluginManager();
             tagPluginManager.apply(pageNodes, errDispatcher, pageInfo);
 
             // Optimization: concatenate contiguous template texts.
@@ -246,7 +236,7 @@ public abstract class Compiler {
         }
 
         // JSR45 Support
-        if (!options.isSmapSuppressed()) {
+        if (!this.ctxt.getOptions().isSmapSuppressed()) {
             smapStr = SmapUtil.generateSmap(ctxt, pageNodes);
         }
 
@@ -391,10 +381,6 @@ public abstract class Compiler {
             }
         }
 
-    }
-
-    protected boolean getDefaultIsSession() {
-        return defaultIsSession;
     }
 
     private static final class CleanVisitor extends Node.Visitor {

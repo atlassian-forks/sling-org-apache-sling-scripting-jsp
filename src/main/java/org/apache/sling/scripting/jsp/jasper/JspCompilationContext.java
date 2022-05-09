@@ -79,7 +79,13 @@ public class JspCompilationContext {
     private volatile TagInfo tagInfo;
     private volatile URL tagFileJarUrl;
 
-    private final boolean defaultIsSession;
+    public JspCompilationContext(String jspUri,
+                                 boolean isErrPage,
+                                 Options options,
+                                 ServletContext context,
+                                 JspRuntimeContext rctxt) {
+        this(jspUri, isErrPage, options, context, rctxt, Constants.JSP_PACKAGE_NAME);
+    }
 
     // jspURI _must_ be relative to the context
     public JspCompilationContext(String jspUri,
@@ -87,7 +93,7 @@ public class JspCompilationContext {
                                  Options options,
                                  ServletContext context,
                                  JspRuntimeContext rctxt,
-                                 boolean defaultIsSession) {
+                                 String basePckName) {
 
         this.jspUri = canonicalURI(jspUri);
         this.isErrPage = isErrPage;
@@ -109,8 +115,7 @@ public class JspCompilationContext {
 
         this.rctxt = rctxt;
         this.tagFileJarUrls = new HashMap<>();
-        this.basePackageName = Constants.JSP_PACKAGE_NAME;
-        this.defaultIsSession = defaultIsSession;
+        this.basePackageName = basePckName;
     }
 
     public JspCompilationContext(String tagfile,
@@ -118,9 +123,8 @@ public class JspCompilationContext {
                                  Options options,
                                  ServletContext context,
                                  JspRuntimeContext rctxt,
-                                 boolean defaultIsSession,
                                  URL tagFileJarUrl) {
-        this(tagfile, false, options, context, rctxt, defaultIsSession);
+        this(tagfile, false, options, context, rctxt);
         this.isTagFile = true;
         this.tagInfo = tagInfo;
         this.tagFileJarUrl = tagFileJarUrl;
@@ -198,8 +202,7 @@ public class JspCompilationContext {
         if (jspCompiler != null ) {
             return jspCompiler;
         }
-        jspCompiler = new JDTCompiler(defaultIsSession);
-        jspCompiler.init(this);
+        jspCompiler = new JDTCompiler(this);
         return jspCompiler;
     }
 
@@ -249,7 +252,6 @@ public class JspCompilationContext {
         return context.getResource(canonicalURI(res));
     }
 
-    @SuppressWarnings("unchecked")
     public Set<String> getResourcePaths(String path) {
         return context.getResourcePaths(canonicalURI(path));
     }

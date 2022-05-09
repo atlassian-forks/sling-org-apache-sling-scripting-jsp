@@ -544,7 +544,7 @@ class TagFileProcessor {
             if (wrapper == null) {
                 wrapper = new JspServletWrapper(ctxt.getServletContext(), ctxt
                       .getOptions(), tagFilePath, n.getTagInfo(), ctxt
-                      .getRuntimeContext(), compiler.getDefaultIsSession(),
+                      .getRuntimeContext(),
                       ctxt.getTagFileJarUrl(tagFilePath));
                 wrapper.getJspEngineContext().setTagFileUrls(ctxt);
                 wrapper = rctxt.addWrapper(tagFilePath, wrapper);
@@ -590,7 +590,6 @@ class TagFileProcessor {
                             tagFilePath,
                           tempTagInfo,
                           ctxt.getRuntimeContext(),
-                          compiler.getDefaultIsSession(),
                           ctxt.getTagFileJarUrl(tempTagFilePath));
                     tempWrapper.getJspEngineContext().setTagFileUrls(ctxt);
                     tagClazz = tempWrapper.loadTagFilePrototype();

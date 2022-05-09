@@ -158,4 +158,6 @@ public interface Options {
      * Are Text strings to be generated as char arrays?
      */
     public boolean genStringAsCharArray();
+
+    boolean isDefaultSession();
 }

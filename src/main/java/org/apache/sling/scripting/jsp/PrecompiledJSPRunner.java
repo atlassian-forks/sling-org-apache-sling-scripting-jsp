@@ -18,75 +18,85 @@
  ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~*/
 package org.apache.sling.scripting.jsp;
 
-import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
 import javax.naming.NamingException;
 import javax.servlet.ServletException;
 
 import org.apache.sling.api.SlingException;
-import org.apache.sling.api.SlingIOException;
 import org.apache.sling.api.SlingServletException;
 import org.apache.sling.api.scripting.SlingBindings;
 import org.apache.sling.commons.compiler.source.JavaEscapeHelper;
+import org.apache.sling.scripting.jsp.jasper.Options;
 import org.apache.sling.scripting.jsp.jasper.compiler.JspRuntimeContext;
 import org.apache.sling.scripting.jsp.jasper.runtime.AnnotationProcessor;
 import org.apache.sling.scripting.jsp.jasper.runtime.HttpJspBase;
+import org.apache.sling.scripting.jsp.jasper.servlet.JspServletWrapper;
 import org.apache.sling.scripting.spi.bundle.BundledRenderUnit;
 import org.osgi.framework.Bundle;
-import org.osgi.service.component.annotations.Component;
 
-@Component(service = {PrecompiledJSPRunner.class})
 public class PrecompiledJSPRunner {
 
-    private final ConcurrentHashMap<HttpJspBase, Object> locks = new ConcurrentHashMap<>();
+    private final Options options;
 
-    boolean callPrecompiledJSP(JspRuntimeContext.JspFactoryHandler jspFactoryHandler, JspServletConfig jspServletConfig,
+    private final ConcurrentHashMap<HttpJspBase, JspHolder> holders = new ConcurrentHashMap<>();
+
+    public PrecompiledJSPRunner(final Options options) {
+        this.options = options;
+    }
+
+    boolean callPrecompiledJSP(JspRuntimeContext runtimeContext, JspRuntimeContext.JspFactoryHandler jspFactoryHandler, JspServletConfig jspServletConfig,
                                SlingBindings bindings) {
         boolean found = false;
-        HttpJspBase jsp = null;
-        try {
-            jspFactoryHandler.incUsage();
-            BundledRenderUnit bundledRenderUnit = (BundledRenderUnit) bindings.get(BundledRenderUnit.VARIABLE);
-            if (bundledRenderUnit != null && bundledRenderUnit.getUnit() instanceof HttpJspBase) {
-                found = true;
-                jsp = (HttpJspBase) bundledRenderUnit.getUnit();
-                if (jsp.getServletConfig() == null) {
-                    Object lock = locks.computeIfAbsent(jsp, key -> new Object());
-                    synchronized (lock) {
-                        if (jsp.getServletConfig() == null) {
-                            PrecompiledServletConfig servletConfig = new PrecompiledServletConfig(jspServletConfig, bundledRenderUnit);
-                            AnnotationProcessor annotationProcessor =
-                                    (AnnotationProcessor) jspServletConfig.getServletContext()
-                                            .getAttribute(AnnotationProcessor.class.getName());
+        final BundledRenderUnit bundledRenderUnit = (BundledRenderUnit) bindings.get(BundledRenderUnit.VARIABLE);
+        if (bundledRenderUnit != null && bundledRenderUnit.getUnit() instanceof HttpJspBase) {
+            found = true;
+            final HttpJspBase jsp = (HttpJspBase) bundledRenderUnit.getUnit();
+            final JspHolder holder = holders.computeIfAbsent(jsp, key -> new JspHolder());
+            if (holder.wrapper == null) {
+                synchronized (holder) {
+                    if (holder.wrapper == null ) {
+                        try {
+                            final PrecompiledServletConfig servletConfig = new PrecompiledServletConfig(jspServletConfig, bundledRenderUnit);
+                            final AnnotationProcessor annotationProcessor = (AnnotationProcessor) jspServletConfig.getServletContext()
+                                                .getAttribute(AnnotationProcessor.class.getName());
                             if (annotationProcessor != null) {
                                 annotationProcessor.processAnnotations(jsp);
                                 annotationProcessor.postConstruct(jsp);
                             }
+
+                            final JspServletWrapper wrapper = new JspServletWrapper(servletConfig, this.options, bundledRenderUnit.getPath(), false, runtimeContext, jsp);
                             jsp.init(servletConfig);
+
+                            holder.wrapper = wrapper;
+                        } catch ( final ServletException se ) {
+                            throw new SlingServletException(se);
+                        } catch (IllegalAccessException | InvocationTargetException | NamingException e) {
+                            throw new SlingException("Unable to process annotations for servlet " + jsp.getClass().getName() + ".", e);
+                        } catch (NoClassDefFoundError ignored) {
+                            // wave your hands like we don't care - we're missing support for precompiled JSPs
                         }
                     }
                 }
-                jsp.service(bindings.getRequest(), bindings.getResponse());
+            }
 
-            }
-        } catch (IllegalAccessException | InvocationTargetException | NamingException e) {
-            throw new SlingException("Unable to process annotations for servlet " + jsp.getClass().getName() + ".", e);
-        } catch (NoClassDefFoundError ignored) {
-            // wave your hands like we don't care - we're missing support for precompiled JSPs
-        } catch (IOException e) {
-            throw new SlingIOException(e);
-        } catch (ServletException e) {
-            throw new SlingServletException(e);
-        } finally {
-            jspFactoryHandler.decUsage();
-            if (jsp != null) {
-                locks.remove(jsp);
-            }
+            holder.wrapper.service(bindings);
         }
         return found;
+    }
+
+    public void cleanup() {
+        final Set<JspHolder> holders = new HashSet<>(this.holders.values());
+        this.holders.clear();
+        for(final JspHolder h : holders) {
+            if ( h.wrapper != null ) {
+                h.wrapper.destroy(true);
+            }
+        }
     }
 
     private static class PrecompiledServletConfig extends JspServletConfig {
@@ -110,5 +120,11 @@ public class PrecompiledJSPRunner {
             }
             return servletName;
         }
+    }
+
+    public static final class JspHolder {
+
+        public volatile JspServletWrapper wrapper;
+
     }
 }

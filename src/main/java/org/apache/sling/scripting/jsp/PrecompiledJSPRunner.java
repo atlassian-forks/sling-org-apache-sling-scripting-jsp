@@ -92,10 +92,14 @@ public class PrecompiledJSPRunner {
     public void cleanup() {
         final Set<JspHolder> holders = new HashSet<>(this.holders.values());
         this.holders.clear();
-        for(final JspHolder h : holders) {
-            if ( h.wrapper != null ) {
-                h.wrapper.destroy(true);
-            }
+        try {
+            for(final JspHolder h : holders) {
+                if ( h.wrapper != null ) {
+                    h.wrapper.destroy(true);
+                }
+            }                
+        } catch ( final Throwable t) {
+            // we ignore this exception as this might be called during shutdown
         }
     }
 

@@ -16,13 +16,8 @@
  */
 package org.apache.sling.scripting.jsp;
 
-import java.io.InputStream;
-import java.net.MalformedURLException;
-import java.net.URL;
-import java.util.Enumeration;
-import java.util.EventListener;
-import java.util.Map;
-import java.util.Set;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.servlet.Filter;
 import javax.servlet.FilterRegistration;
@@ -35,9 +30,13 @@ import javax.servlet.ServletRegistration.Dynamic;
 import javax.servlet.SessionCookieConfig;
 import javax.servlet.SessionTrackingMode;
 import javax.servlet.descriptor.JspConfigDescriptor;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import java.io.InputStream;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.util.Enumeration;
+import java.util.EventListener;
+import java.util.Map;
+import java.util.Set;
 
 /**
  * The <code>JspServletContext</code> TODO
@@ -293,6 +292,11 @@ public class JspServletContext implements ServletContext {
     }
 
     @Override
+    public Dynamic addJspFile(String s, String s1) {
+        return delegatee.addJspFile(s, s1);
+    }
+
+    @Override
     public <T extends Servlet> T createServlet(Class<T> clazz) throws ServletException {
         return delegatee.createServlet(clazz);
     }
@@ -395,5 +399,35 @@ public class JspServletContext implements ServletContext {
     @Override
     public String getVirtualServerName() {
         return delegatee.getVirtualServerName();
+    }
+
+    @Override
+    public int getSessionTimeout() {
+        return delegatee.getSessionTimeout();
+    }
+
+    @Override
+    public void setSessionTimeout(int i) {
+        delegatee.setSessionTimeout(i);
+    }
+
+    @Override
+    public String getRequestCharacterEncoding() {
+        return delegatee.getRequestCharacterEncoding();
+    }
+
+    @Override
+    public void setRequestCharacterEncoding(String s) {
+        delegatee.setRequestCharacterEncoding(s);
+    }
+
+    @Override
+    public String getResponseCharacterEncoding() {
+        return delegatee.getResponseCharacterEncoding();
+    }
+
+    @Override
+    public void setResponseCharacterEncoding(String s) {
+        delegatee.setResponseCharacterEncoding(s);
     }
 }

@@ -5,9 +5,9 @@
  * The ASF licenses this file to You under the Apache License, Version 2.0
  * (the "License"); you may not use this file except in compliance with
  * the License.  You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -16,9 +16,7 @@
  */
 package org.apache.sling.scripting.jsp.jasper.runtime;
 
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
+import org.apache.sling.scripting.jsp.jasper.el.ELContextImpl;
 
 import javax.el.ArrayELResolver;
 import javax.el.BeanELResolver;
@@ -35,20 +33,20 @@ import javax.servlet.jsp.JspApplicationContext;
 import javax.servlet.jsp.JspContext;
 import javax.servlet.jsp.el.ImplicitObjectELResolver;
 import javax.servlet.jsp.el.ScopedAttributeELResolver;
-
-import org.apache.el.ExpressionFactoryImpl;
-import org.apache.sling.scripting.jsp.jasper.el.ELContextImpl;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
 
 /**
  * Implementation of JspApplicationContext
- * 
+ *
  * @author Jacob Hookom
  */
 public class JspApplicationContextImpl implements JspApplicationContext {
 
 	private final static String KEY = JspApplicationContextImpl.class.getName();
 
-	private final static ExpressionFactory expressionFactory = new ExpressionFactoryImpl();
+	private final static ExpressionFactory expressionFactory = ExpressionFactory.newInstance();
 
 	private final List<ELContextListener> contextListeners = new ArrayList<ELContextListener>();
 
@@ -112,7 +110,7 @@ public class JspApplicationContextImpl implements JspApplicationContext {
 			r.add(new MapELResolver());
 			r.add(new ResourceBundleELResolver());
 			r.add(new ListELResolver());
-			r.add(new ArrayELResolver());	
+			r.add(new ArrayELResolver());
 			r.add(new BeanELResolver());
 			r.add(new ScopedAttributeELResolver());
 			this.resolver = r;

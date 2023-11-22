@@ -16,14 +16,6 @@
  */
 package org.apache.sling.scripting.jsp.jasper.runtime;
 
-import java.io.InputStream;
-import java.net.MalformedURLException;
-import java.net.URL;
-import java.util.Enumeration;
-import java.util.EventListener;
-import java.util.Map;
-import java.util.Set;
-
 import javax.servlet.Filter;
 import javax.servlet.FilterRegistration;
 import javax.servlet.RequestDispatcher;
@@ -37,6 +29,13 @@ import javax.servlet.SessionCookieConfig;
 import javax.servlet.SessionTrackingMode;
 import javax.servlet.descriptor.JspConfigDescriptor;
 import javax.servlet.jsp.PageContext;
+import java.io.InputStream;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.util.Enumeration;
+import java.util.EventListener;
+import java.util.Map;
+import java.util.Set;
 
 /**
  * Wrapper around the Sling servlet config in order to return a wrapped servlet context
@@ -105,6 +104,11 @@ class InternalServletConfigWrapper implements ServletConfig {
         @Override
         public Dynamic addServlet(String servletName, Class<? extends Servlet> servletClass) {
             return delegate.addServlet(servletName, servletClass);
+        }
+
+        @Override
+        public Dynamic addJspFile(String s, String s1) {
+            return delegate.addJspFile(s, s1);
         }
 
         @Override
@@ -211,6 +215,36 @@ class InternalServletConfigWrapper implements ServletConfig {
         @Override
         public String getVirtualServerName() {
             return delegate.getVirtualServerName();
+        }
+
+        @Override
+        public int getSessionTimeout() {
+            return delegate.getSessionTimeout();
+        }
+
+        @Override
+        public void setSessionTimeout(int i) {
+            delegate.setSessionTimeout(i);
+        }
+
+        @Override
+        public String getRequestCharacterEncoding() {
+            return delegate.getRequestCharacterEncoding();
+        }
+
+        @Override
+        public void setRequestCharacterEncoding(String s) {
+            delegate.setRequestCharacterEncoding(s);
+        }
+
+        @Override
+        public String getResponseCharacterEncoding() {
+            return delegate.getResponseCharacterEncoding();
+        }
+
+        @Override
+        public void setResponseCharacterEncoding(String s) {
+            delegate.setResponseCharacterEncoding(s);
         }
 
         public InternalServletContextWrapper(ServletContext sc) {

@@ -17,11 +17,10 @@
 
 package org.apache.sling.scripting.jsp.jasper.compiler;
 
-import java.lang.reflect.Method;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Hashtable;
-import java.util.Iterator;
+import org.apache.sling.scripting.jsp.jasper.Constants;
+import org.apache.sling.scripting.jsp.jasper.JasperException;
+import org.apache.sling.scripting.jsp.jasper.el.ELContextImpl;
+import org.xml.sax.Attributes;
 
 import javax.el.ELException;
 import javax.el.ExpressionFactory;
@@ -35,12 +34,11 @@ import javax.servlet.jsp.tagext.TagExtraInfo;
 import javax.servlet.jsp.tagext.TagInfo;
 import javax.servlet.jsp.tagext.TagLibraryInfo;
 import javax.servlet.jsp.tagext.ValidationMessage;
-
-import org.apache.el.lang.ELSupport;
-import org.apache.sling.scripting.jsp.jasper.Constants;
-import org.apache.sling.scripting.jsp.jasper.JasperException;
-import org.apache.sling.scripting.jsp.jasper.el.ELContextImpl;
-import org.xml.sax.Attributes;
+import java.lang.reflect.Method;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Hashtable;
+import java.util.Iterator;
 
 /**
  * Performs validation on the page elements. Attributes are checked for
@@ -1129,7 +1127,7 @@ class Validator {
                                     }
                                     // Check casting
                                     try {
-                                        ELSupport.checkType(attrs.getValue(i), expectedClass);
+                                        pageInfo.getExpressionFactory().coerceToType(attrs.getValue(i), expectedClass);
                                     } catch (Exception e) {
                                         err.jspError
                                             (n, "jsp.error.coerce_to_type",

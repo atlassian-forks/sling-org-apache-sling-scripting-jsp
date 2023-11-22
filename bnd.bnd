@@ -1,4 +1,3 @@
 ScriptEngine-Name:${project.name}
 ScriptEngine-Version:${project.version}
 Import-Package: *
--conditionalpackage: org.apache.el.*

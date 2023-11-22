@@ -16,19 +16,17 @@
  */
 package org.apache.sling.scripting.jsp.jasper.compiler;
 
+import org.apache.sling.scripting.jsp.jasper.Constants;
+import org.apache.sling.scripting.jsp.jasper.JasperException;
+
+import javax.el.ExpressionFactory;
+import javax.servlet.jsp.tagext.TagLibraryInfo;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Vector;
-
-import org.apache.el.ExpressionFactoryImpl;
-import org.apache.sling.scripting.jsp.jasper.Constants;
-import org.apache.sling.scripting.jsp.jasper.JasperException;
-
-import javax.el.ExpressionFactory;
-import javax.servlet.jsp.tagext.TagLibraryInfo;
 
 /**
  * A repository for various info about the translation unit under compilation.
@@ -67,17 +65,17 @@ public class PageInfo {
 
     private boolean scriptless = false;
     private boolean scriptingInvalid = false;
-    
+
     private String isELIgnoredValue;
     private boolean isELIgnored = false;
-    
+
     // JSP 2.1
     private String deferredSyntaxAllowedAsLiteralValue;
     private boolean deferredSyntaxAllowedAsLiteral = false;
-    private ExpressionFactory expressionFactory = new ExpressionFactoryImpl();
+    private ExpressionFactory expressionFactory = ExpressionFactory.newInstance();
     private String trimDirectiveWhitespacesValue;
     private boolean trimDirectiveWhitespaces = false;
-    
+
     private String omitXmlDecl = null;
     private String doctypeName = null;
     private String doctypePublic = null;
@@ -620,7 +618,7 @@ public class PageInfo {
 
         isELIgnoredValue = value;
     }
-    
+
     /*
      * deferredSyntaxAllowedAsLiteral
      */
@@ -641,7 +639,7 @@ public class PageInfo {
 
         deferredSyntaxAllowedAsLiteralValue = value;
     }
-    
+
     /*
      * trimDirectiveWhitespaces
      */
@@ -682,7 +680,7 @@ public class PageInfo {
     public Mark getNonCustomTagPrefix(String prefix) {
         return (Mark) nonCustomTagPrefixMap.get(prefix);
     }
-    
+
     public String getDeferredSyntaxAllowedAsLiteral() {
         return deferredSyntaxAllowedAsLiteralValue;
     }

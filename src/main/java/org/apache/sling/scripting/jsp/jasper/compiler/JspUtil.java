@@ -17,6 +17,16 @@
 
 package org.apache.sling.scripting.jsp.jasper.compiler;
 
+import org.apache.sling.commons.compiler.source.JavaEscapeHelper;
+import org.apache.sling.scripting.jsp.jasper.Constants;
+import org.apache.sling.scripting.jsp.jasper.JasperException;
+import org.apache.sling.scripting.jsp.jasper.JspCompilationContext;
+import org.apache.sling.scripting.jsp.jasper.el.ExpressionEvaluatorImpl;
+import org.xml.sax.Attributes;
+
+import javax.el.ExpressionFactory;
+import javax.el.FunctionMapper;
+import javax.servlet.jsp.el.ExpressionEvaluator;
 import java.io.CharArrayWriter;
 import java.io.IOException;
 import java.io.InputStream;
@@ -26,17 +36,6 @@ import java.net.URL;
 import java.util.Vector;
 import java.util.jar.JarFile;
 import java.util.zip.ZipEntry;
-
-import javax.el.FunctionMapper;
-import javax.servlet.jsp.el.ExpressionEvaluator;
-
-import org.apache.el.ExpressionFactoryImpl;
-import org.apache.sling.commons.compiler.source.JavaEscapeHelper;
-import org.apache.sling.scripting.jsp.jasper.Constants;
-import org.apache.sling.scripting.jsp.jasper.JasperException;
-import org.apache.sling.scripting.jsp.jasper.JspCompilationContext;
-import org.apache.sling.scripting.jsp.jasper.el.ExpressionEvaluatorImpl;
-import org.xml.sax.Attributes;
 
 /**
  * This class has all the utility method(s).
@@ -67,7 +66,7 @@ public class JspUtil {
 
     //tc6
     private final static ExpressionEvaluator expressionEvaluator =
-        new ExpressionEvaluatorImpl(new ExpressionFactoryImpl());
+        new ExpressionEvaluatorImpl(ExpressionFactory.newInstance());
 
     private static final String javaKeywords[] = {
         "abstract", "assert", "boolean", "break", "byte", "case",

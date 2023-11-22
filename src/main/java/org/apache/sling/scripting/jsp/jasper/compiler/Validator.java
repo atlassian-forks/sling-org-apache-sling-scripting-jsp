@@ -17,7 +17,6 @@
 
 package org.apache.sling.scripting.jsp.jasper.compiler;
 
-import org.apache.el.lang.ELSupport;
 import org.apache.sling.scripting.jsp.jasper.Constants;
 import org.apache.sling.scripting.jsp.jasper.JasperException;
 import org.apache.sling.scripting.jsp.jasper.el.ELContextImpl;
@@ -1128,7 +1127,7 @@ class Validator {
                                     }
                                     // Check casting
                                     try {
-                                        ELSupport.coerceToType(null, attrs.getValue(i), expectedClass);
+                                        pageInfo.getExpressionFactory().coerceToType(attrs.getValue(i), expectedClass);
                                     } catch (Exception e) {
                                         err.jspError
                                             (n, "jsp.error.coerce_to_type",
